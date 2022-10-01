@@ -25,7 +25,7 @@ from xdcc_dl.xdcc.XDCCClient import XDCCClient
 def download_packs(
         packs: List[XDCCPack],
         timeout: int = 120,
-        fallback_channel: Optional[str] = None,
+        channels: Optional[list] = None,
         throttle: Union[int, str] = -1,
         wait_time: int = 0,
         username: Optional[str] = None,
@@ -35,7 +35,7 @@ def download_packs(
     Downloads a list of XDCC Packs
     :param packs: The packs to download
     :param timeout: Specifies timeout time
-    :param fallback_channel: A fallback channel for when no channels were found
+    :param channels: Additional channels to join on-top of whois channel
     :param throttle: Throttles the download to n bytes per second.
                      If this value is <= 0, the download speed will be
                      unlimited
@@ -52,7 +52,7 @@ def download_packs(
         client = XDCCClient(
             pack,
             timeout=timeout,
-            fallback_channel=fallback_channel,
+            channels=channels,
             throttle=throttle,
             wait_time=wait_time,
             username="" if username is None else username,

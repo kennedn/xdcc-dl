@@ -51,7 +51,7 @@ class XDCCClient(SimpleIRCClient):
             pack: XDCCPack,
             retry: bool = False,
             timeout: int = 120,
-            fallback_channel: Optional[str] = None,
+            channels: Optional[list] = None,
             throttle: Union[int, str] = -1,
             wait_time: int = 0,
             username: str = "",
@@ -62,8 +62,7 @@ class XDCCClient(SimpleIRCClient):
         :param pack: The pack to downloadX
         :param retry: Set to true for retried downloads.
         :param timeout: Sets the timeout time for starting downloads
-        :param fallback_channel: A fallback channel for when whois
-                                 fails to find a valid channel
+        :param channels: Additional channels to join on-top of whois channel
         :param throttle: Throttles the download to n bytes per second.
                          If this value is <= 0, the download speed will be
                          unlimited
@@ -99,15 +98,11 @@ class XDCCClient(SimpleIRCClient):
         self.connect_start_time = 0.0
         self.timeout = timeout + wait_time
         self.timed_out = False
-        self.fallback_channel = fallback_channel
+        self.additional_channels = channels 
         self.wait_time = wait_time
         self.connected = True
         self.disconnected = False
-
-        if channel_join_delay is None:
-            self.channel_join_delay = random.randint(5, 10)
-        else:
-            self.channel_join_delay = channel_join_delay
+        self.channel_join_delay = channel_join_delay if channel_join_delay is not None else 0
 
         # XDCC state variables
         self.peer_address = ""
@@ -315,15 +310,15 @@ class XDCCClient(SimpleIRCClient):
         :return: None
         """
         self.logger.info("WHOIS End")
-        if self.channels is None:
-            if self.fallback_channel is not None:
-                channel = self.fallback_channel
+        if self.additional_channels is not None:
+            for channel in self.additional_channels:
                 if not channel.startswith("#"):
                     channel = "#" + channel
+                self.logger.info(f"Joining channel {channel}")
                 conn.join(channel)
-                return
-            else:
-                self.on_join(conn, _, True)
+            return
+        else:
+            self.on_join(conn, _, True)
 
     def on_join(
             self,

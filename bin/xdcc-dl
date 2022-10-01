@@ -41,11 +41,12 @@ def main(args: argparse.Namespace, logger: logging.Logger):
             args.message, os.getcwd(), args.server
         )
         prepare_packs(packs, args.out)
-
+        channels = [s for s in args.channels.split(',') if args.channels]
+        channels = channels if len(channels) > 0 else None
         download_packs(
             packs,
             timeout=args.timeout,
-            fallback_channel=args.fallback_channel,
+            channels=channels,
             throttle=args.throttle,
             wait_time=args.wait_time,
             username=args.username,
